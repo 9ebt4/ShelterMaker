@@ -7,15 +7,13 @@ public partial class GoogleUser
 {
     public int GoogleUserId { get; set; }
 
-    public string? GoogleToken { get; set; }
+    public string GoogleToken { get; set; } = null!;
 
-    public int? AssociateId { get; set; }
+    public bool IsActive { get; set; }
 
     public int? PersonId { get; set; }
 
-    public bool? IsActive { get; set; }
-
-    public virtual Associate? Associate { get; set; }
+    public virtual ICollection<Associate> Associates { get; set; } = new List<Associate>();
 
     public virtual Person? Person { get; set; }
 }

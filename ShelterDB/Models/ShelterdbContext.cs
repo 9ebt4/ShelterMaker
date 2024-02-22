@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ShelterDB.Models;
 
-public partial class ShelterdbContext : DbContext
+public partial class ShelterDbContext : DbContext
 {
-    public ShelterdbContext()
+    public ShelterDbContext()
     {
     }
 
-    public ShelterdbContext(DbContextOptions<ShelterdbContext> options)
+    public ShelterDbContext(DbContextOptions<ShelterDbContext> options)
         : base(options)
     {
     }
@@ -95,7 +95,7 @@ public partial class ShelterdbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer(Secret.connection);
+        => optionsBuilder.UseSqlServer("Server=.\\SQLExpress;Database=shelterDB;Trusted_Connection=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -169,11 +169,18 @@ public partial class ShelterdbContext : DbContext
 
             entity.HasOne(d => d.AssociateMaintenance).WithMany(p => p.Associates)
                 .HasForeignKey(d => d.AssociateMaintenanceId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Associate__assoc__52593CB8");
 
             entity.HasOne(d => d.Facility).WithMany(p => p.Associates)
                 .HasForeignKey(d => d.FacilityId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Associate__facil__5165187F");
+
+            entity.HasOne(d => d.GoogleUser).WithMany(p => p.Associates)
+                .HasForeignKey(d => d.GoogleUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Associate_GoogleUser");
         });
 
         modelBuilder.Entity<AssociateMaintenance>(entity =>
@@ -417,20 +424,15 @@ public partial class ShelterdbContext : DbContext
             entity.ToTable("GoogleUser");
 
             entity.Property(e => e.GoogleUserId).HasColumnName("googleUserID");
-            entity.Property(e => e.AssociateId).HasColumnName("associateID");
             entity.Property(e => e.GoogleToken)
                 .HasMaxLength(4000)
                 .HasColumnName("googleToken");
             entity.Property(e => e.IsActive).HasColumnName("isActive");
-            entity.Property(e => e.PersonId).HasColumnName("personID");
-
-            entity.HasOne(d => d.Associate).WithMany(p => p.GoogleUsers)
-                .HasForeignKey(d => d.AssociateId)
-                .HasConstraintName("FK__GoogleUse__assoc__5535A963");
+            entity.Property(e => e.PersonId).HasColumnName("personId");
 
             entity.HasOne(d => d.Person).WithMany(p => p.GoogleUsers)
                 .HasForeignKey(d => d.PersonId)
-                .HasConstraintName("FK__GoogleUse__perso__5629CD9C");
+                .HasConstraintName("FK_Associate_Person");
         });
 
         modelBuilder.Entity<Incident>(entity =>
@@ -608,6 +610,7 @@ public partial class ShelterdbContext : DbContext
 
             entity.Property(e => e.PatronId).HasColumnName("patronID");
             entity.Property(e => e.BedId).HasColumnName("bedID");
+            entity.Property(e => e.FacilityId).HasColumnName("facilityID");
             entity.Property(e => e.IntakeId).HasColumnName("intakeID");
             entity.Property(e => e.IsActive).HasColumnName("isActive");
             entity.Property(e => e.LastCheckIn)
@@ -622,6 +625,10 @@ public partial class ShelterdbContext : DbContext
             entity.HasOne(d => d.Bed).WithMany(p => p.Patrons)
                 .HasForeignKey(d => d.BedId)
                 .HasConstraintName("FK__Patron__bedID__0F624AF8");
+
+            entity.HasOne(d => d.Facility).WithMany(p => p.Patrons)
+                .HasForeignKey(d => d.FacilityId)
+                .HasConstraintName("FK__Patron__facility__4D5F7D71");
 
             entity.HasOne(d => d.Intake).WithMany(p => p.Patrons)
                 .HasForeignKey(d => d.IntakeId)

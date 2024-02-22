@@ -21,11 +21,15 @@ public partial class Patron
 
     public bool? IsActive { get; set; }
 
+    public int? FacilityId { get; set; }
+
     public virtual Bed? Bed { get; set; }
 
     public virtual ICollection<CaseWorkerPatron> CaseWorkerPatrons { get; set; } = new List<CaseWorkerPatron>();
 
     public virtual ICollection<EmergencyContact> EmergencyContacts { get; set; } = new List<EmergencyContact>();
+
+    public virtual Facility? Facility { get; set; }
 
     public virtual Intake? Intake { get; set; }
 

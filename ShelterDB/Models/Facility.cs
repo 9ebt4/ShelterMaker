@@ -20,4 +20,6 @@ public partial class Facility
     public virtual ICollection<Checklist> Checklists { get; set; } = new List<Checklist>();
 
     public virtual ICollection<ContactInfo> ContactInfos { get; set; } = new List<ContactInfo>();
+
+    public virtual ICollection<Patron> Patrons { get; set; } = new List<Patron>();
 }

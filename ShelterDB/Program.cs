@@ -1,7 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 using Serilog;
+using ShelterDB.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+
+builder.Services.AddDbContext<ShelterDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ShelterDbConnection")));
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
