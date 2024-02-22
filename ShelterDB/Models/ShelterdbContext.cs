@@ -37,8 +37,6 @@ public partial class ShelterDbContext : DbContext
 
     public virtual DbSet<Checklist> Checklists { get; set; }
 
-    public virtual DbSet<ChecklistMaintenance> ChecklistMaintenances { get; set; }
-
     public virtual DbSet<ContactInfo> ContactInfos { get; set; }
 
     public virtual DbSet<ContactMaintenance> ContactMaintenances { get; set; }
@@ -95,7 +93,7 @@ public partial class ShelterDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.\\SQLExpress;Database=shelterDB;Trusted_Connection=True;Encrypt=False");
+        => optionsBuilder.UseSqlServer(Secret.connection);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -297,30 +295,17 @@ public partial class ShelterDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("endTime");
             entity.Property(e => e.FacilityId).HasColumnName("facilityID");
+            entity.Property(e => e.Options)
+                .HasMaxLength(100)
+                .IsFixedLength();
             entity.Property(e => e.StartTime)
                 .HasColumnType("datetime")
                 .HasColumnName("startTime");
 
             entity.HasOne(d => d.Facility).WithMany(p => p.Checklists)
                 .HasForeignKey(d => d.FacilityId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Checklist__facil__398D8EEE");
-        });
-
-        modelBuilder.Entity<ChecklistMaintenance>(entity =>
-        {
-            entity.HasKey(e => e.ChecklistMaintenanceId).HasName("PK__Checklis__7BE24F6EBBD1401B");
-
-            entity.ToTable("ChecklistMaintenance");
-
-            entity.Property(e => e.ChecklistMaintenanceId).HasColumnName("checklistMaintenanceID");
-            entity.Property(e => e.ChecklistId).HasColumnName("checklistID");
-            entity.Property(e => e.Options)
-                .HasMaxLength(100)
-                .HasColumnName("options");
-
-            entity.HasOne(d => d.Checklist).WithMany(p => p.ChecklistMaintenances)
-                .HasForeignKey(d => d.ChecklistId)
-                .HasConstraintName("FK__Checklist__check__3C69FB99");
         });
 
         modelBuilder.Entity<ContactInfo>(entity =>
@@ -524,15 +509,15 @@ public partial class ShelterDbContext : DbContext
             entity.ToTable("Item");
 
             entity.Property(e => e.ItemId).HasColumnName("itemID");
-            entity.Property(e => e.ChecklistMaintenanceId).HasColumnName("checklistMaintenanceID");
+            entity.Property(e => e.CheckListId).HasColumnName("checkListId");
             entity.Property(e => e.Content)
                 .HasMaxLength(255)
-                .HasColumnName("content");
+                .IsFixedLength();
             entity.Property(e => e.IsChecked).HasColumnName("isChecked");
 
-            entity.HasOne(d => d.ChecklistMaintenance).WithMany(p => p.Items)
-                .HasForeignKey(d => d.ChecklistMaintenanceId)
-                .HasConstraintName("FK__Item__checklistM__3F466844");
+            entity.HasOne(d => d.CheckList).WithMany(p => p.Items)
+                .HasForeignKey(d => d.CheckListId)
+                .HasConstraintName("fk_checklist");
         });
 
         modelBuilder.Entity<MedicalCondition>(entity =>
