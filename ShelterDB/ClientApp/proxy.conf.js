@@ -7,6 +7,7 @@ const PROXY_CONFIG = [
   {
     context: [
       "api/Facility",
+      "/swagger",
    ],
     target: target,
     secure: false,

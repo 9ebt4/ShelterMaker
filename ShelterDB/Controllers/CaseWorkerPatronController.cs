@@ -98,6 +98,31 @@ namespace ShelterDB.Controllers
                 return StatusCode(500, "An error occurred while updating the association.");
             }
         }
+
+        [HttpDelete("{caseWorkerPatronId}")]
+        public async Task<IActionResult> DeleteCaseWorkerPatronAssociation(int caseWorkerPatronId)
+        {
+            var caseWorkerPatron = await _dbContext.CaseWorkerPatrons
+                .FindAsync(caseWorkerPatronId);
+
+            if (caseWorkerPatron == null)
+            {
+                return NotFound($"Association with ID {caseWorkerPatronId} not found.");
+            }
+
+            _dbContext.CaseWorkerPatrons.Remove(caseWorkerPatron);
+
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+                return NoContent(); // Successfully deleted
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here
+                return StatusCode(500, "An error occurred while deleting the association.");
+            }
+        }
     }
 
 }
